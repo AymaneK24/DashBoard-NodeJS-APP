@@ -17,11 +17,50 @@ steps:
 
 
 - task: Bash@3
+  displayName: 'Preparation for Analysis'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "Preparation for Analysis"
+
+- task: SonarQubePrepare@8
+  inputs:
+    SonarQube: 'SonarQube1-Connection'
+    scannerMode: 'cli'
+    cliScannerVersion: '8.0.1.6346'
+    configMode: 'manual'
+    cliProjectKey: 'AymaneK24_DashBoard-NodeJS-APP_66cb0c96-a439-47cf-b3b3-1e5a16a6a39c'
+    cliProjectName: 'Dashboard'
+    cliSources: '.'
+    extraProperties: 'sonar.exclusions=**/*.bin, **/*.zip, **/*.exe'
+
+
+- task: Bash@3
   displayName: 'Starting Analysis'
   inputs:
     targetType: 'inline'
     script: |
       echo "Starting Analysis"
+
+
+- task: SonarQubeAnalyze@8
+  inputs:
+    jdkversion: 'JAVA_HOME_21_X64'
+
+
+- task: Bash@3
+  displayName: 'Pushing Results to Quality Gate'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "Pushing Results to Quality Gate"
+
+- task: SonarQubePublish@8
+  inputs:
+    pollingTimeoutSec: '300'
+
+
+
 
 
 

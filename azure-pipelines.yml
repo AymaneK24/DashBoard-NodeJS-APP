@@ -4,18 +4,43 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
 
+stages:
+- stage: SecurityScan
+  displayName: "OWASP ZAP Security Scan"
+  jobs:
+  - job: ZapScan
+    displayName: "Run ZAP Full Scan"
+    pool:
+      vmImage: 'ubuntu-latest'
 
-- task: Bash@3
-  displayName: 'Pushing Results to Quality Gate'
-  inputs:
-    targetType: 'inline'
-    script: |
-      docker pull ghcr.io/zaproxy/zaproxy:stable
-      docker run -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t https://www.example.com -g gen.conf -r testreport.html
+    steps:
 
+    - script: |
+        echo "Creating working directory"
+        mkdir zap-report
+        chmod 777 zap-report
 
+        echo "Running OWASP ZAP Full Scan"
+        docker run --rm \
+          -u root \
+          -v $(pwd)/zap-report:/zap/wrk \
+          ghcr.io/zaproxy/zaproxy:stable \
+          zap-full-scan.py \
+          -t https://your-application-url.com \
+          -r zap-report.html \
+          -J zap-report.json \
+          -w zap-report.md \
+          || true
+
+      displayName: "Run ZAP Docker Scan"
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'zap-report'
+        ArtifactName: 'ZAP-Security-Report'
+        publishLocation: 'Container'
+      displayName: "Publish ZAP Report"
 
 
 

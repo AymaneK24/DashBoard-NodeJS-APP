@@ -12,7 +12,8 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      docker
+      docker pull ghcr.io/zaproxy/zaproxy:stable
+      docker run -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t https://www.example.com -g gen.conf -r testreport.html
 
 
 
